@@ -1,0 +1,64 @@
+name: Daily Playwright QA Job Scraper & Google Sheets Updater
+
+on:
+  schedule:
+    # 9:00 AM IST (Indian Standard Time) every day
+    # IST is UTC+5:30 -> 9:00 AM IST = 3:30 AM UTC -> '30 3 * * *'
+    # Note: GitHub Actions scheduled cron runs may experience queue delays during high load.
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in Dry Run mode (do not write to Google Sheets)'
+        required: false
+        default: 'false'
+        type: boolean
+      min_score:
+        description: 'Minimum match score threshold (default 90)'
+        required: false
+        default: '90'
+        type: string
+
+jobs:
+  scrape-and-update-sheets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Test Suite (Pytest)
+        run: |
+          python -m pytest test_scraper.py -v
+
+      - name: Execute Daily Job Scraper & Google Sheets Updater
+        env:
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          WORKSHEET_NAME: ${{ secrets.WORKSHEET_NAME || 'Sheet1' }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+          TZ: "Asia/Kolkata"
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          
+          MIN_SCORE_FLAG=""
+          if [ -n "${{ inputs.min_score }}" ]; then
+            MIN_SCORE_FLAG="--min-score ${{ inputs.min_score }}"
+          fi
+
+          python job_scraper.py $DRY_RUN_FLAG $MIN_SCORE_FLAG

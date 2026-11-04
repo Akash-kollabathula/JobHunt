@@ -1,0 +1,11 @@
+# Python dependencies for Daily Playwright QA Job Scraper & Google Sheets Updater
+gspread>=6.1.0
+google-auth>=2.29.0
+requests>=2.31.0
+pydantic>=2.6.0
+python-dateutil>=2.9.0
+pytz>=2024.1
+pytest>=8.1.0
+tenacity>=8.2.3
+rich>=13.7.0
+python-dotenv>=1.0.1

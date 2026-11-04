@@ -1,0 +1,6 @@
+{
+  "name": "Daily Playwright QA Job Hub",
+  "description": "Automated job scraper and Google Sheets updater tailored for Playwright + TypeScript SDETs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
